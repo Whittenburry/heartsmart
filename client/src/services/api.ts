@@ -29,9 +29,16 @@ export interface OptimizedRecipe {
   estimatedNutritionNotes?: string[]
 }
 
-const API_BASE_URL = 'http://localhost:3000/api'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_BASE_URL = `${BASE_URL}/api`
 
 export const api = {
+  async pingHealth(): Promise<{ status: string }> {
+    const res = await fetch(`${BASE_URL}/health`)
+    if (!res.ok) throw new Error('Health check failed')
+    return res.json()
+  },
+
   async extractRecipe(url: string): Promise<ExtractedRecipe> {
     const res = await fetch(`${API_BASE_URL}/extract-recipe`, {
       method: 'POST',

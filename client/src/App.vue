@@ -1,5 +1,22 @@
 <script setup lang="ts">
 import { RouterView, RouterLink } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { api } from '@/services/api'
+
+const serverStatus = ref<'checking' | 'online' | 'offline'>('checking')
+
+onMounted(async () => {
+  try {
+    const res = await api.pingHealth()
+    if (res.status === 'ok') {
+      serverStatus.value = 'online'
+    } else {
+      serverStatus.value = 'offline'
+    }
+  } catch (e) {
+    serverStatus.value = 'offline'
+  }
+})
 </script>
 
 <template>
@@ -28,6 +45,21 @@ import { RouterView, RouterLink } from 'vue-router'
 
     <footer class="border-t border-slate-800 py-8 mt-12">
       <div class="max-w-6xl mx-auto px-4 text-center text-slate-500 text-sm">
+        <div class="flex items-center justify-center gap-2 mb-4">
+          <span class="relative flex h-2 w-2">
+            <span v-if="serverStatus === 'checking'" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2" :class="{
+              'bg-emerald-500': serverStatus === 'online',
+              'bg-rose-500': serverStatus === 'offline',
+              'bg-slate-400': serverStatus === 'checking'
+            }"></span>
+          </span>
+          <span class="text-xs uppercase tracking-wider font-semibold" :class="{
+              'text-emerald-500/80': serverStatus === 'online',
+              'text-rose-500/80': serverStatus === 'offline',
+              'text-slate-500': serverStatus === 'checking'
+            }">API {{ serverStatus }}</span>
+        </div>
         <p>&copy; 2026 John Whittenburg. HeartSmart MVP.</p>
         <p class="mt-2 text-xs max-w-xl mx-auto">
           Disclaimer: This app provides general wellness-oriented recipe adaptations and is not medical advice. Nutrition details may be approximate. Users with medical conditions should consult a professional.
