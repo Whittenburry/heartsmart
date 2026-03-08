@@ -1,7 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const genai_1 = require("@google/genai");
-const ai = new genai_1.GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let ai = null;
+if (process.env.GEMINI_API_KEY) {
+    ai = new genai_1.GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+}
 /**
  * Expected strict output structure for JSON response
  */
@@ -74,6 +77,9 @@ Rules for "Heart healthy":
 - Keep output completely realistic.
 
 Provide exactly a valid JSON output matching the required schema.`;
+            if (!ai) {
+                throw new Error('Gemini API key is configured but SDK failed to initialize.');
+            }
             const response = await ai.models.generateContent({
                 model: 'gemini-2.5-flash',
                 contents: prompt,
